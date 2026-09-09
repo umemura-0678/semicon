@@ -31,7 +31,7 @@ async function login(formData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/menu");
 }
 
 // 新規登録する
@@ -57,10 +57,20 @@ async function signUp(formData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/menu");
 }
 
 export default async function LoginPage({ searchParams }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // すでにログイン済みならメニューへ進む
+  if (user) {
+    redirect("/menu");
+  }
+
   // URLの ?error=xxx を受け取る
   const { error } = await searchParams;
   const message = ERROR_MESSAGES[error];
