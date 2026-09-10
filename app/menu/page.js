@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import styles from "./page.module.css";
 
@@ -51,8 +52,12 @@ export default async function MenuPage() {
             <p className={styles.chapterNumber}>第２章</p>
             <h2 className={styles.chapterTitle}>半導体の物性と基礎</h2>
             <ul className={styles.submenu}>
-              <li>2.1　半導体とは</li>
-              <li>2.2　電気回路と半導体</li>
+              <li>
+                <Link href="/chapter2/2-1">2.1　半導体とは</Link>
+              </li>
+              <li>
+                <Link href="/chapter2/2-2">2.2　電気回路と半導体</Link>
+              </li>
               <li>2.3　半導体システムの役割と課題</li>
             </ul>
           </article>
@@ -77,6 +82,9 @@ export default async function MenuPage() {
               <li>4.4　半導体試験項目</li>
             </ul>
           </article>
+          <Link href="/exam" className={`${styles.card} ${styles.examCard}`}>
+            <h2 className={styles.chapterTitle}>総合問題</h2>
+          </Link>
         </div>
       </main>
     </div>
