@@ -1,0 +1,116 @@
+.wrap {
+  position: absolute;
+  left: 1rem;
+  top: auto;
+  bottom: auto;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.dragging {
+  z-index: 20;
+  cursor: grabbing;
+}
+
+.panel {
+  width: 147px;
+  padding: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.video {
+  display: block;
+  width: 147px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #111;
+  transform: scaleX(-1);
+}
+
+.meter {
+  margin-top: 0.25rem;
+}
+
+.meterTrack {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e3e8ee;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.meterFill {
+  height: 100%;
+  border-radius: 999px;
+  background: #888;
+  transition: width 0.25s ease;
+}
+
+.meterFill.focus {
+  background: #19752c;
+}
+
+.meterFill.maybe {
+  background: #c77800;
+}
+
+.meterFill.bored {
+  background: #c62828;
+}
+
+.meterFill.noface {
+  background: #888;
+}
+
+.meterFill.doze {
+  background: #7b1fa2;
+}
+
+.levels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #222;
+}
+
+.focusValue {
+  color: #19752c;
+}
+
+.boredValue {
+  color: #c62828;
+}
+
+.dozeValue {
+  width: 100%;
+  color: #7b1fa2;
+  text-align: center;
+}
+
+.undetected {
+  width: 100%;
+  color: #555;
+  text-align: center;
+}
+
+.error {
+  margin: 0.35rem 0 0;
+  color: #c00;
+  font-size: 0.75rem;
+}

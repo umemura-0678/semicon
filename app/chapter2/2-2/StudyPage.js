@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import ChatPrompt from "@/components/ChatPrompt";
+import BoredomDetector from "@/components/BoredomDetector";
 import styles from "./page.module.css";
 
 const DEFAULT_CHAT_WIDTH = 380;
@@ -457,6 +458,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
           <ChatPrompt />
         </aside>
       </div>
+      <BoredomDetector />
     </div>
   );
 }
