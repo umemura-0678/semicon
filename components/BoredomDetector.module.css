@@ -1,116 +1,177 @@
 .wrap {
-  position: absolute;
-  left: 1rem;
-  top: auto;
-  bottom: auto;
-  z-index: 8;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
   cursor: grab;
   touch-action: none;
   user-select: none;
 }
 
 .dragging {
-  z-index: 20;
   cursor: grabbing;
-}
-
-.panel {
-  width: 147px;
-  padding: 0;
-  border-radius: 6px;
-  background: transparent;
-  box-shadow: none;
-  pointer-events: none;
+  z-index: 30;
 }
 
 .video {
   display: block;
-  width: 147px;
+  width: 88px;
+  flex-shrink: 0;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 4px;
   background: #111;
   transform: scaleX(-1);
+  pointer-events: none;
 }
 
-.meter {
-  margin-top: 0.25rem;
+.side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 148px;
+  min-width: 0;
+  pointer-events: none;
 }
 
 .meterTrack {
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e3e8ee;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .meterFill {
   height: 100%;
   border-radius: 999px;
-  background: #888;
+  background: #c5d5e3;
   transition: width 0.25s ease;
 }
 
 .meterFill.focus {
-  background: #19752c;
+  background: #8ee0a4;
 }
 
 .meterFill.maybe {
-  background: #c77800;
+  background: #ffc16b;
 }
 
 .meterFill.bored {
-  background: #c62828;
+  background: #ff8a80;
 }
 
 .meterFill.noface {
-  background: #888;
+  background: #c5d5e3;
 }
 
 .meterFill.doze {
-  background: #7b1fa2;
+  background: #ce93d8;
 }
 
 .levels {
   display: flex;
   justify-content: space-between;
   gap: 0.35rem;
-  margin-top: 0.25rem;
-  padding: 0.15rem 0.3rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.94);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.3;
-  color: #222;
+  color: #fff;
 }
 
 .focusValue {
-  color: #19752c;
+  color: #b7f0c6;
 }
 
 .boredValue {
-  color: #c62828;
+  color: #ffc1bc;
+}
+
+.dozeValue,
+.undetected {
+  width: 100%;
+  text-align: center;
 }
 
 .dozeValue {
-  width: 100%;
-  color: #7b1fa2;
-  text-align: center;
+  color: #e1bee7;
 }
 
 .undetected {
-  width: 100%;
-  color: #555;
-  text-align: center;
+  color: #dbe7f0;
 }
 
 .error {
-  margin: 0.35rem 0 0;
+  margin: 0;
+  color: #ffcdd2;
+  font-size: 0.7rem;
+}
+
+.floating {
+  position: fixed;
+  z-index: 20;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.floating .video {
+  width: 176px;
+}
+
+.floating .side {
+  width: 176px;
+}
+
+.floating .meterTrack {
+  background: #e3e8ee;
+}
+
+.floating .meterFill.focus {
+  background: #19752c;
+}
+
+.floating .meterFill.maybe {
+  background: #c77800;
+}
+
+.floating .meterFill.bored {
+  background: #c62828;
+}
+
+.floating .meterFill.noface {
+  background: #888;
+}
+
+.floating .meterFill.doze {
+  background: #7b1fa2;
+}
+
+.floating .levels {
+  padding: 0.1rem 0.15rem;
+  color: #222;
+}
+
+.floating .focusValue {
+  color: #19752c;
+}
+
+.floating .boredValue {
+  color: #c62828;
+}
+
+.floating .dozeValue {
+  color: #7b1fa2;
+}
+
+.floating .undetected {
+  color: #555;
+}
+
+.floating .error {
   color: #c00;
-  font-size: 0.75rem;
 }

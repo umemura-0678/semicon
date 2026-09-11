@@ -165,6 +165,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/menu">メニューへ戻る</Link>
+        <BoredomDetector />
         <div className={styles.navActions}>
           <button
             type="button"
@@ -516,7 +517,6 @@ export default function StudyPage({ isAdminUser = false, children }) {
           <ChatPrompt />
         </aside>
       </div>
-      <BoredomDetector />
     </div>
   );
 }

@@ -22,8 +22,9 @@ export default function BoredomDetector() {
   const [verdict, setVerdict] = useState(null);
   const [score, setScore] = useState(0);
   const [error, setError] = useState("");
-  const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [docked, setDocked] = useState(true);
   const [dragging, setDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     let cancelled = false;
@@ -147,35 +148,9 @@ export default function BoredomDetector() {
     };
   }, []);
 
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    const parent = wrap?.offsetParent;
-    if (!wrap || !parent) {
-      return undefined;
-    }
-
-    const margin = 16;
-    const x = margin;
-    const y = Math.max(0, parent.clientHeight - wrap.offsetHeight - margin);
-    setPosition({ x, y });
-
-    function onResize() {
-      setPosition((current) => clampPosition(current.x, current.y));
-    }
-
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  function clampPosition(x, y) {
-    const wrap = wrapRef.current;
-    const parent = wrap?.offsetParent;
-    if (!wrap || !parent) {
-      return { x, y };
-    }
-
-    const maxX = Math.max(0, parent.clientWidth - wrap.offsetWidth);
-    const maxY = Math.max(0, parent.clientHeight - wrap.offsetHeight);
+  function clampPosition(x, y, width, height) {
+    const maxX = Math.max(0, window.innerWidth - width);
+    const maxY = Math.max(0, window.innerHeight - height);
     return {
       x: Math.min(maxX, Math.max(0, x)),
       y: Math.min(maxY, Math.max(0, y)),
@@ -183,18 +158,15 @@ export default function BoredomDetector() {
   }
 
   function handlePointerDown(event) {
-    if (event.pointerType === "touch") {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } else {
-      event.preventDefault();
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const rect = event.currentTarget.getBoundingClientRect();
     dragRef.current = {
       pointerX: event.clientX,
       pointerY: event.clientY,
-      x: position.x,
-      y: position.y,
+      x: rect.left,
+      y: rect.top,
+      moved: false,
     };
     setDragging(true);
   }
@@ -204,52 +176,80 @@ export default function BoredomDetector() {
       return;
     }
 
-    const nextX = dragRef.current.x + event.clientX - dragRef.current.pointerX;
-    const nextY = dragRef.current.y + event.clientY - dragRef.current.pointerY;
-    setPosition(clampPosition(nextX, nextY));
+    const dx = event.clientX - dragRef.current.pointerX;
+    const dy = event.clientY - dragRef.current.pointerY;
+    if (!dragRef.current.moved && Math.hypot(dx, dy) < 8) {
+      return;
+    }
+
+    if (!dragRef.current.moved) {
+      dragRef.current.moved = true;
+      setDocked(false);
+    }
+
+    const wrap = event.currentTarget;
+    setPosition(
+      clampPosition(
+        dragRef.current.x + dx,
+        dragRef.current.y + dy,
+        wrap.offsetWidth,
+        wrap.offsetHeight,
+      ),
+    );
   }
 
   function handlePointerUp(event) {
+    const drag = dragRef.current;
     dragRef.current = null;
     setDragging(false);
+
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    if (!drag?.moved) {
+      return;
+    }
+
+    const nav = event.currentTarget.closest("nav");
+    const headerBottom = nav?.getBoundingClientRect().bottom ?? 72;
+    if (event.clientY <= headerBottom + 12) {
+      setDocked(true);
     }
   }
 
   return (
-    <div
+    <section
       ref={wrapRef}
-      className={`${styles.wrap} ${dragging ? styles.dragging : ""}`}
-      style={{ left: position.x, top: position.y }}
+      className={`${styles.wrap} ${docked ? styles.docked : styles.floating} ${dragging ? styles.dragging : ""}`}
+      style={docked ? undefined : { left: position.x, top: position.y }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      aria-label="カメラ映像。ドラッグして移動できます"
+      aria-label="カメラ映像。ドラッグしてヘッダーから取り出せます"
+      aria-live="polite"
     >
-      <section className={styles.panel} aria-live="polite">
-        <video
-          ref={videoRef}
-          className={styles.video}
-          playsInline
-          muted
-          autoPlay
-        />
-        <div className={styles.meter}>
+      <video
+        ref={videoRef}
+        className={styles.video}
+        playsInline
+        muted
+        autoPlay
+      />
+      <div className={styles.side}>
+        <div
+          className={styles.meterTrack}
+          role="meter"
+          aria-label="退屈度"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(score * 100)}
+        >
           <div
-            className={styles.meterTrack}
-            role="meter"
-            aria-label="退屈度"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(score * 100)}
-          >
-            <div
-              className={`${styles.meterFill} ${verdict ? styles[verdict.key] : styles.noface}`}
-              style={{ width: `${Math.round(score * 100)}%` }}
-            />
-          </div>
+            className={`${styles.meterFill} ${verdict ? styles[verdict.key] : styles.noface}`}
+            style={{ width: `${Math.round(score * 100)}%` }}
+          />
         </div>
         <div className={styles.levels}>
           {verdict?.key === "noface" ? (
@@ -268,7 +268,7 @@ export default function BoredomDetector() {
           )}
         </div>
         {error && <p className={styles.error}>{error}</p>}
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
