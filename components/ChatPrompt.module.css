@@ -1,0 +1,124 @@
+.chat {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.chat h2 {
+  flex-shrink: 0;
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  color: #1f4f73;
+}
+
+.chat > p {
+  flex-shrink: 0;
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.messages {
+  flex: 1;
+  min-height: 8rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-right: 0.25rem;
+}
+
+.empty {
+  margin: auto 0;
+  color: #667;
+  font-size: 0.9rem;
+}
+
+.userMessage,
+.assistantMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 95%;
+}
+
+.userMessage {
+  align-self: flex-end;
+}
+
+.assistantMessage {
+  align-self: flex-start;
+}
+
+.role {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4a6b82;
+}
+
+.userMessage .role {
+  text-align: right;
+}
+
+.bubble {
+  white-space: pre-wrap;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.userMessage .bubble {
+  background: #2f6f9f;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistantMessage .bubble {
+  background: #eef6fb;
+  border-left: 6px solid #2f6f9f;
+  border-bottom-left-radius: 4px;
+}
+
+.form {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form textarea,
+.form button {
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+}
+
+.form textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.form button {
+  align-self: flex-start;
+  border: none;
+  border-radius: 6px;
+  background: #2f6f9f;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.form button:disabled,
+.form textarea:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.error {
+  flex-shrink: 0;
+  margin: 0 0 0.75rem;
+  color: #c00;
+  font-size: 0.9rem;
+}

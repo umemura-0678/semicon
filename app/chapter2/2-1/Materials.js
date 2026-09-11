@@ -1,3 +1,4 @@
+import YoutubePlayer from "@/components/YoutubePlayer";
 import { getYoutubeId } from "@/utils/youtube";
 import { addMaterial, deleteMaterial } from "./actions";
 import styles from "./page.module.css";
@@ -33,19 +34,7 @@ export default function Materials({ materials, isAdminUser }) {
           return (
             <article key={material.id} className={styles.materialCard}>
               {youtubeId && (
-                <a
-                  href={material.youtube_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.thumbLink}
-                >
-                  <img
-                    src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
-                    alt={material.title}
-                    className={styles.thumbImage}
-                  />
-                  <span className={styles.playIcon}>▶</span>
-                </a>
+                <YoutubePlayer videoId={youtubeId} title={material.title} />
               )}
               <h3>{material.title}</h3>
               {isAdminUser && (
