@@ -2,7 +2,12 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import ChatPrompt from "@/components/ChatPrompt";
 import styles from "./page.module.css";
+
+const DEFAULT_CHAT_WIDTH = 380;
+const MIN_CHAT_WIDTH = 280;
+const MIN_MAIN_WIDTH = 280;
 
 const QUESTIONS = [
   {
@@ -72,10 +77,51 @@ const QUESTIONS = [
   },
 ];
 
-export default function StudyPage() {
+export default function StudyPage({ isAdminUser = false, children }) {
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
+  const [chatOpen, setChatOpen] = useState(true);
+  const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
+  const [resizing, setResizing] = useState(false);
   const resultRef = useRef(null);
+  const bodyRef = useRef(null);
+  const resizingRef = useRef(false);
+
+  function clampChatWidth(width) {
+    const bodyWidth = bodyRef.current?.getBoundingClientRect().width ?? 1200;
+    const maxWidth = Math.max(240, bodyWidth - MIN_MAIN_WIDTH);
+    const minWidth = Math.min(MIN_CHAT_WIDTH, maxWidth);
+    return Math.round(Math.min(maxWidth, Math.max(minWidth, width)));
+  }
+
+  function handleResizePointerDown(event) {
+    if (event.pointerType === "touch") {
+      return;
+    }
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    resizingRef.current = true;
+    setResizing(true);
+  }
+
+  function handleResizePointerMove(event) {
+    if (!resizingRef.current || !bodyRef.current) {
+      return;
+    }
+
+    const right = bodyRef.current.getBoundingClientRect().right;
+    setChatWidth(clampChatWidth(right - event.clientX));
+  }
+
+  function handleResizePointerUp(event) {
+    resizingRef.current = false;
+    setResizing(false);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
 
   function handleChange(questionId, value) {
     setAnswers((current) => ({ ...current, [questionId]: value }));
@@ -118,8 +164,28 @@ export default function StudyPage() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/menu">メニューへ戻る</Link>
+        <div className={styles.navActions}>
+          <button
+            type="button"
+            className={styles.chatToggle}
+            aria-expanded={chatOpen}
+            aria-controls="chatgpt-pane"
+            onClick={() => setChatOpen((open) => !open)}
+          >
+            {chatOpen ? "ChatGPTを閉じる" : "ChatGPTを開く"}
+          </button>
+          {isAdminUser && <span className={styles.adminBadge}>管理者</span>}
+        </div>
       </nav>
 
+      <div
+        ref={bodyRef}
+        className={styles.body}
+        data-chat-open={chatOpen ? "true" : "false"}
+        data-resizing={resizing ? "true" : "false"}
+        style={chatOpen ? { "--chat-width": `${chatWidth}px` } : undefined}
+      >
+      <div className={styles.mainScroll}>
       <div className={styles.container}>
         <h1>2.2　電気回路と半導体</h1>
         <p>
@@ -361,9 +427,35 @@ export default function StudyPage() {
           )}
         </section>
 
+        {children}
+
         <footer className={styles.footer}>
           高校生のための半導体専門書 ― 2.2 電気回路と半導体
         </footer>
+      </div>
+      </div>
+
+        <aside
+          id="chatgpt-pane"
+          className={styles.chatPane}
+          hidden={!chatOpen}
+          aria-hidden={!chatOpen}
+        >
+          <div
+            className={styles.resizeHandle}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="ChatGPT欄の幅を変更"
+            aria-valuenow={chatWidth}
+            aria-valuemin={MIN_CHAT_WIDTH}
+            tabIndex={0}
+            onPointerDown={handleResizePointerDown}
+            onPointerMove={handleResizePointerMove}
+            onPointerUp={handleResizePointerUp}
+            onPointerCancel={handleResizePointerUp}
+          />
+          <ChatPrompt />
+        </aside>
       </div>
     </div>
   );

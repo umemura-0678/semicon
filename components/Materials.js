@@ -1,16 +1,16 @@
 import YoutubePlayer from "@/components/YoutubePlayer";
 import { getYoutubeId } from "@/utils/youtube";
-import { addMaterial, deleteMaterial } from "./actions";
-import styles from "./page.module.css";
+import { addMaterial, deleteMaterial } from "@/app/chapter2/actions";
+import styles from "./Materials.module.css";
 
-export default function Materials({ materials, isAdminUser }) {
+export default function Materials({ chapter, materials, isAdminUser }) {
   return (
     <section className={styles.materials}>
       <h2>補足資料</h2>
 
       {isAdminUser && (
         <form action={addMaterial} className={styles.materialForm}>
-          <input type="hidden" name="chapter" value="2-1" />
+          <input type="hidden" name="chapter" value={chapter} />
           <input
             name="title"
             type="text"
@@ -40,6 +40,7 @@ export default function Materials({ materials, isAdminUser }) {
               {isAdminUser && (
                 <form action={deleteMaterial}>
                   <input type="hidden" name="id" value={material.id} />
+                  <input type="hidden" name="chapter" value={chapter} />
                   <button type="submit">削除</button>
                 </form>
               )}

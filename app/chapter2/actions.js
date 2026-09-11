@@ -6,11 +6,21 @@ import { createClient } from "@/utils/supabase/server";
 import { isAdmin } from "@/utils/auth/admin";
 import { getYoutubeId } from "@/utils/youtube";
 
+const CHAPTER_PATHS = {
+  "2-1": "/chapter2/2-1",
+  "2-2": "/chapter2/2-2",
+};
+
+function chapterPath(chapter) {
+  return CHAPTER_PATHS[chapter] ?? null;
+}
+
 export async function addMaterial(formData) {
   const title = formData.get("title");
-  const chapter = formData.get("chapter") || "2-1";
+  const chapter = formData.get("chapter");
+  const path = chapterPath(chapter);
 
-  if (!title || title.trim() === "") {
+  if (!title || title.trim() === "" || !path) {
     return;
   }
 
@@ -43,11 +53,13 @@ export async function addMaterial(formData) {
     user_id: user.id,
   });
 
-  revalidatePath("/chapter2/2-1");
+  revalidatePath(path);
 }
 
 export async function deleteMaterial(formData) {
   const id = formData.get("id");
+  const chapter = formData.get("chapter");
+  const path = chapterPath(chapter);
   const supabase = await createClient();
   const {
     data: { user },
@@ -57,10 +69,10 @@ export async function deleteMaterial(formData) {
     redirect("/login");
   }
 
-  if (!isAdmin(user) || !id) {
+  if (!isAdmin(user) || !id || !path) {
     return;
   }
 
   await supabase.from("study_materials").delete().eq("id", id);
-  revalidatePath("/chapter2/2-1");
+  revalidatePath(path);
 }

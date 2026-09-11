@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { isAdmin } from "@/utils/auth/admin";
 import StudyPage from "./StudyPage";
-import Materials from "./Materials";
+import Materials from "@/components/Materials";
 
 export const metadata = {
   title: "2.1　半導体とは",
@@ -32,7 +32,11 @@ export default async function Chapter21Page() {
 
   return (
     <StudyPage isAdminUser={isAdminUser}>
-      <Materials materials={materials ?? []} isAdminUser={isAdminUser} />
+      <Materials
+        chapter="2-1"
+        materials={materials ?? []}
+        isAdminUser={isAdminUser}
+      />
     </StudyPage>
   );
 }
