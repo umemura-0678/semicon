@@ -28,6 +28,22 @@
   text-align: left;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.adminBadge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: #1f4f73;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .logoutButton {
   flex-shrink: 0;
   padding: 0.5rem 1rem;

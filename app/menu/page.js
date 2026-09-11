@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
+import { isAdmin } from "@/utils/auth/admin";
 import styles from "./page.module.css";
 
 async function logout() {
@@ -28,11 +29,14 @@ export default async function MenuPage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>半導体技術者検定4級対策講座</h1>
-        <form action={logout}>
-          <button type="submit" className={styles.logoutButton}>
-            ログアウト
-          </button>
-        </form>
+        <div className={styles.headerActions}>
+          {isAdmin(user) && <span className={styles.adminBadge}>管理者</span>}
+          <form action={logout}>
+            <button type="submit" className={styles.logoutButton}>
+              ログアウト
+            </button>
+          </form>
+        </div>
       </header>
       <main className={styles.main}>
         <div className={styles.cards}>

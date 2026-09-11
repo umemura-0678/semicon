@@ -1,11 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import qrImage from "./QR_sougou1.png";
+import { isAdmin } from "@/utils/auth/admin";
+import ExamForms from "./ExamForms";
 import styles from "./page.module.css";
-
-const EXAM_URL = "https://forms.cloud.microsoft/r/CFEmTGA4rL";
 
 export const metadata = {
   title: "総合問題",
@@ -21,35 +19,26 @@ export default async function ExamPage() {
     redirect("/login");
   }
 
+  const { data: forms, error } = await supabase
+    .from("study_materials")
+    .select("*")
+    .eq("chapter", "exam")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+  }
+
+  const isAdminUser = isAdmin(user);
+
   return (
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/menu">メニューへ戻る</Link>
+        {isAdminUser && <span className={styles.adminBadge}>管理者</span>}
       </nav>
       <main className={styles.main}>
-        <div className={styles.content}>
-          <a
-            href={EXAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.qrLink}
-          >
-            <Image
-              src={qrImage}
-              alt="総合問題No.1"
-              className={styles.qr}
-              priority
-            />
-          </a>
-          <a
-            href={EXAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.url}
-          >
-            {EXAM_URL}
-          </a>
-        </div>
+        <ExamForms forms={forms ?? []} isAdminUser={isAdminUser} />
       </main>
     </div>
   );

@@ -72,7 +72,7 @@ const QUESTIONS = [
   },
 ];
 
-export default function StudyPage() {
+export default function StudyPage({ isAdminUser = false, children }) {
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
@@ -118,6 +118,7 @@ export default function StudyPage() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/menu">メニューへ戻る</Link>
+        {isAdminUser && <span className={styles.adminBadge}>管理者</span>}
       </nav>
 
       <div className={styles.container}>
@@ -418,6 +419,8 @@ export default function StudyPage() {
             </div>
           )}
         </section>
+
+        {children}
 
         <footer className={styles.footer}>
           高校生のための半導体専門書 ― 第2章 半導体の物性と基礎
