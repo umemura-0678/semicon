@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { boredomLabel, combineBoredomScore, scoreBoredomFrame } from "@/utils/boredom";
+import DozeExplosion from "./DozeExplosion";
 import styles from "./BoredomDetector.module.css";
 
 const WASM_PATH =
@@ -19,7 +20,10 @@ export default function BoredomDetector() {
   const lastUiRef = useRef(0);
   const wrapRef = useRef(null);
   const dragRef = useRef(null);
+  const wasDozeRef = useRef(false);
+  const restoreTimerRef = useRef(0);
   const [verdict, setVerdict] = useState(null);
+  const [exploding, setExploding] = useState(false);
   const [score, setScore] = useState(0);
   const [error, setError] = useState("");
   const [cameraOn, setCameraOn] = useState(false);
@@ -162,6 +166,25 @@ export default function BoredomDetector() {
     };
   }, [cameraOn]);
 
+  useEffect(() => {
+    const isDoze = verdict?.key === "doze";
+    if (isDoze && !wasDozeRef.current && !restoreTimerRef.current) {
+      setExploding(true);
+      restoreTimerRef.current = window.setTimeout(() => {
+        restoreTimerRef.current = 0;
+        setExploding(false);
+      }, 3000);
+    }
+    wasDozeRef.current = isDoze;
+  }, [verdict?.key]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(restoreTimerRef.current);
+      restoreTimerRef.current = 0;
+    };
+  }, []);
+
   function clampPosition(x, y, width, height) {
     const maxX = Math.max(0, window.innerWidth - width);
     const maxY = Math.max(0, window.innerHeight - height);
@@ -189,63 +212,77 @@ export default function BoredomDetector() {
     }
 
     event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const rect = event.currentTarget.getBoundingClientRect();
+    const wrap = wrapRef.current;
+    if (!wrap) {
+      return;
+    }
+
+    const rect = wrap.getBoundingClientRect();
+    const nav = wrap.closest("nav");
     dragRef.current = {
+      pointerId: event.pointerId,
       pointerX: event.clientX,
       pointerY: event.clientY,
       x: rect.left,
       y: rect.top,
+      headerBottom: nav?.getBoundingClientRect().bottom ?? 72,
       moved: false,
     };
     setDragging(true);
-  }
 
-  function handlePointerMove(event) {
-    if (!dragRef.current) {
-      return;
+    function onMove(moveEvent) {
+      const drag = dragRef.current;
+      if (!drag || moveEvent.pointerId !== drag.pointerId) {
+        return;
+      }
+
+      const dx = moveEvent.clientX - drag.pointerX;
+      const dy = moveEvent.clientY - drag.pointerY;
+      if (!drag.moved && Math.hypot(dx, dy) < 8) {
+        return;
+      }
+
+      if (!drag.moved) {
+        drag.moved = true;
+        setDocked(false);
+      }
+
+      const current = wrapRef.current;
+      setPosition(
+        clampPosition(
+          drag.x + dx,
+          drag.y + dy,
+          current?.offsetWidth ?? rect.width,
+          current?.offsetHeight ?? rect.height,
+        ),
+      );
     }
 
-    const dx = event.clientX - dragRef.current.pointerX;
-    const dy = event.clientY - dragRef.current.pointerY;
-    if (!dragRef.current.moved && Math.hypot(dx, dy) < 8) {
-      return;
+    function onUp(upEvent) {
+      if (upEvent.pointerId !== dragRef.current?.pointerId) {
+        return;
+      }
+
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+
+      const drag = dragRef.current;
+      dragRef.current = null;
+      setDragging(false);
+
+      if (!drag?.moved) {
+        return;
+      }
+
+      if (upEvent.clientY <= drag.headerBottom + 12) {
+        setDocked(true);
+      }
     }
 
-    if (!dragRef.current.moved) {
-      dragRef.current.moved = true;
-      setDocked(false);
-    }
-
-    const wrap = event.currentTarget;
-    setPosition(
-      clampPosition(
-        dragRef.current.x + dx,
-        dragRef.current.y + dy,
-        wrap.offsetWidth,
-        wrap.offsetHeight,
-      ),
-    );
-  }
-
-  function handlePointerUp(event) {
-    const drag = dragRef.current;
-    dragRef.current = null;
-    setDragging(false);
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-
-    if (!drag?.moved) {
-      return;
-    }
-
-    const nav = event.currentTarget.closest("nav");
-    const headerBottom = nav?.getBoundingClientRect().bottom ?? 72;
-    if (event.clientY <= headerBottom + 12) {
-      setDocked(true);
-    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }
 
   return (
@@ -253,10 +290,6 @@ export default function BoredomDetector() {
       ref={wrapRef}
       className={`${styles.wrap} ${cameraOn ? styles.cameraOn : styles.cameraOff} ${docked ? styles.docked : styles.floating} ${dragging ? styles.dragging : ""}`}
       style={docked ? undefined : { left: position.x, top: position.y }}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
       aria-label={cameraOn ? "カメラ映像。ドラッグしてヘッダーから取り出せます" : "カメラは非表示です"}
       aria-live="polite"
     >
@@ -285,8 +318,9 @@ export default function BoredomDetector() {
           )}
         </svg>
       </button>
+      {exploding && <DozeExplosion />}
       {cameraOn && (
-        <div className={styles.preview}>
+        <div className={styles.preview} onPointerDown={handlePointerDown}>
           <video
             ref={videoRef}
             className={styles.video}
