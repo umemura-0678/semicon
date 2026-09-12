@@ -22,11 +22,19 @@ export default function BoredomDetector() {
   const [verdict, setVerdict] = useState(null);
   const [score, setScore] = useState(0);
   const [error, setError] = useState("");
+  const [cameraOn, setCameraOn] = useState(false);
   const [docked, setDocked] = useState(true);
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
+    if (!cameraOn) {
+      setVerdict(null);
+      setScore(0);
+      setError("");
+      return;
+    }
+
     let cancelled = false;
 
     async function start() {
@@ -80,6 +88,12 @@ export default function BoredomDetector() {
 
         streamRef.current = stream;
         const video = videoRef.current;
+        if (!video) {
+          stream.getTracks().forEach((track) => track.stop());
+          landmarker.close();
+          return;
+        }
+
         video.srcObject = stream;
         await video.play();
 
@@ -146,7 +160,7 @@ export default function BoredomDetector() {
         videoRef.current.srcObject = null;
       }
     };
-  }, []);
+  }, [cameraOn]);
 
   function clampPosition(x, y, width, height) {
     const maxX = Math.max(0, window.innerWidth - width);
@@ -157,7 +171,23 @@ export default function BoredomDetector() {
     };
   }
 
+  function handleTogglePointerDown(event) {
+    event.stopPropagation();
+  }
+
+  function handleToggle() {
+    if (cameraOn) {
+      setDocked(true);
+      setDragging(false);
+    }
+    setCameraOn((on) => !on);
+  }
+
   function handlePointerDown(event) {
+    if (!cameraOn) {
+      return;
+    }
+
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     const rect = event.currentTarget.getBoundingClientRect();
@@ -221,54 +251,83 @@ export default function BoredomDetector() {
   return (
     <section
       ref={wrapRef}
-      className={`${styles.wrap} ${docked ? styles.docked : styles.floating} ${dragging ? styles.dragging : ""}`}
+      className={`${styles.wrap} ${cameraOn ? styles.cameraOn : styles.cameraOff} ${docked ? styles.docked : styles.floating} ${dragging ? styles.dragging : ""}`}
       style={docked ? undefined : { left: position.x, top: position.y }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      aria-label="カメラ映像。ドラッグしてヘッダーから取り出せます"
+      aria-label={cameraOn ? "カメラ映像。ドラッグしてヘッダーから取り出せます" : "カメラは非表示です"}
       aria-live="polite"
     >
-      <video
-        ref={videoRef}
-        className={styles.video}
-        playsInline
-        muted
-        autoPlay
-      />
-      <div className={styles.side}>
-        <div
-          className={styles.meterTrack}
-          role="meter"
-          aria-label="退屈度"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(score * 100)}
-        >
-          <div
-            className={`${styles.meterFill} ${verdict ? styles[verdict.key] : styles.noface}`}
-            style={{ width: `${Math.round(score * 100)}%` }}
+      <button
+        type="button"
+        className={styles.toggle}
+        aria-pressed={cameraOn}
+        aria-label={cameraOn ? "カメラをOFF" : "カメラをON"}
+        title={cameraOn ? "カメラをOFF" : "カメラをON"}
+        onPointerDown={handleTogglePointerDown}
+        onClick={handleToggle}
+      >
+        <svg className={styles.icon} viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M20 5h-3.2L15 3H9L7.2 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 14H4V7h4.1l1.8-2h4.2l1.8 2H20v12zM12 8a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"
           />
-        </div>
-        <div className={styles.levels}>
-          {verdict?.key === "noface" ? (
-            <span className={styles.undetected}>顔が見えません</span>
-          ) : verdict?.key === "doze" ? (
-            <span className={styles.dozeValue}>居眠り</span>
-          ) : (
-            <>
-              <span className={styles.focusValue}>
-                集中 {Math.round((1 - score) * 100)}%
-              </span>
-              <span className={styles.boredValue}>
-                退屈 {Math.round(score * 100)}%
-              </span>
-            </>
+          {!cameraOn && (
+            <path
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              d="M3 3l18 18"
+            />
           )}
+        </svg>
+      </button>
+      {cameraOn && (
+        <div className={styles.preview}>
+          <video
+            ref={videoRef}
+            className={styles.video}
+            playsInline
+            muted
+            autoPlay
+          />
+          <div className={styles.side}>
+            <div
+              className={styles.meterTrack}
+              role="meter"
+              aria-label="退屈度"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(score * 100)}
+            >
+              <div
+                className={`${styles.meterFill} ${verdict ? styles[verdict.key] : styles.noface}`}
+                style={{ width: `${Math.round(score * 100)}%` }}
+              />
+            </div>
+            <div className={styles.levels}>
+              {verdict?.key === "noface" ? (
+                <span className={styles.undetected}>顔が見えません</span>
+              ) : verdict?.key === "doze" ? (
+                <span className={styles.dozeValue}>居眠り</span>
+              ) : (
+                <>
+                  <span className={styles.focusValue}>
+                    集中 {Math.round((1 - score) * 100)}%
+                  </span>
+                  <span className={styles.boredValue}>
+                    退屈 {Math.round(score * 100)}%
+                  </span>
+                </>
+              )}
+            </div>
+            {error && <p className={styles.error}>{error}</p>}
+          </div>
         </div>
-        {error && <p className={styles.error}>{error}</p>}
-      </div>
+      )}
     </section>
   );
 }
