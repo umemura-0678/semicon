@@ -85,6 +85,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
   const [resizing, setResizing] = useState(false);
   const resultRef = useRef(null);
+  const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const resizingRef = useRef(false);
 
@@ -188,7 +189,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
         style={chatOpen ? { "--chat-width": `${chatWidth}px` } : undefined}
       >
       <div className={styles.mainScroll}>
-      <div className={styles.container}>
+      <div ref={contentRef} className={styles.container}>
         <h1>1.4　半導体とSDGsの関係性</h1>
         <p>
           半導体は、スマートフォンやパソコンだけでなく、自動車、医療機器、工場、発電設備、通信機器、人工衛星など、社会のさまざまな場所で利用されています。
@@ -645,7 +646,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
             onPointerUp={handleResizePointerUp}
             onPointerCancel={handleResizePointerUp}
           />
-          <ChatPrompt />
+          <ChatPrompt contentRef={contentRef} />
         </aside>
       </div>
     </div>

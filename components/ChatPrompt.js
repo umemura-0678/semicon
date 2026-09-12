@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { askChatGPT } from "@/utils/chat";
 import styles from "./ChatPrompt.module.css";
 
-export default function ChatPrompt() {
+export default function ChatPrompt({ contentRef }) {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -32,7 +32,8 @@ export default function ChatPrompt() {
     setError("");
     setMessages((current) => [...current, { role: "user", content: question }]);
 
-    const result = await askChatGPT(question, messages);
+    const pageText = contentRef?.current?.innerText ?? "";
+    const result = await askChatGPT(question, messages, pageText);
 
     if (result.error) {
       setError(result.error);
@@ -49,7 +50,7 @@ export default function ChatPrompt() {
   return (
     <section className={styles.chat}>
       <h2>ChatGPTに質問する</h2>
-      <p>この章の内容について、わからないことを質問できます。会話の続きも聞けます。</p>
+      <p>左側の本文を踏まえて質問できます。会話の続きも聞けます。</p>
       <div className={styles.messages}>
         {messages.length === 0 && !pending && (
           <p className={styles.empty}>質問を入力すると、ここに会話が表示されます。</p>

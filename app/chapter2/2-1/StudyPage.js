@@ -85,6 +85,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
   const [resizing, setResizing] = useState(false);
   const resultRef = useRef(null);
+  const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const resizingRef = useRef(false);
 
@@ -188,7 +189,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
         style={chatOpen ? { "--chat-width": `${chatWidth}px` } : undefined}
       >
       <div className={styles.mainScroll}>
-      <div className={styles.container}>
+      <div ref={contentRef} className={styles.container}>
         <h1>第2章　半導体の物性と基礎</h1>
         <p>
           私たちの身の回りにあるスマートフォン、コンピュータ、自動車、家電製品などには、多くの半導体が使われている。半導体は、電気を「流す」「流さない」という状態を制御できるため、電子回路を構成する重要な材料である。
@@ -514,7 +515,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
             onPointerUp={handleResizePointerUp}
             onPointerCancel={handleResizePointerUp}
           />
-          <ChatPrompt />
+          <ChatPrompt contentRef={contentRef} />
         </aside>
       </div>
     </div>

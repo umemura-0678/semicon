@@ -5,6 +5,31 @@ import { createClient } from "@/utils/supabase/server";
 
 const MAX_HISTORY = 20;
 const MAX_CONTENT = 4000;
+const MAX_PAGE_TEXT = 12000;
+
+function sanitizePageText(pageText) {
+  if (typeof pageText !== "string") {
+    return "";
+  }
+
+  return pageText.replace(/[ \t]+\n/g, "\n").trim().slice(0, MAX_PAGE_TEXT);
+}
+
+function buildSystemPrompt(pageText) {
+  const base =
+    "あなたは半導体技術者検定4級の学習アシスタントです。高校生にも分かる日本語で、簡潔に正確に答えてください。直前の会話の流れを踏まえて答えてください。";
+
+  if (!pageText) {
+    return base;
+  }
+
+  return `${base}
+
+次の本文はこの学習ページの左側に表示されている内容です。質問はこの本文に関するものとして、本文に基づいて答えてください。本文に書かれていないことは推測しすぎず、その旨を伝えてください。
+
+【このページの本文】
+${pageText}`;
+}
 
 function sanitizeHistory(history) {
   if (!Array.isArray(history)) {
@@ -26,7 +51,7 @@ function sanitizeHistory(history) {
     }));
 }
 
-export async function askChatGPT(prompt, history = []) {
+export async function askChatGPT(prompt, history = [], pageText = "") {
   if (typeof prompt !== "string" || prompt.trim() === "") {
     return { error: "質問を入力してください。" };
   }
@@ -49,8 +74,7 @@ export async function askChatGPT(prompt, history = []) {
   const messages = [
     {
       role: "system",
-      content:
-        "あなたは半導体技術者検定4級の学習アシスタントです。高校生にも分かる日本語で、簡潔に正確に答えてください。直前の会話の流れを踏まえて答えてください。",
+      content: buildSystemPrompt(sanitizePageText(pageText)),
     },
     ...sanitizeHistory(history),
     {

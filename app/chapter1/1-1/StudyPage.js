@@ -85,6 +85,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
   const [resizing, setResizing] = useState(false);
   const resultRef = useRef(null);
+  const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const resizingRef = useRef(false);
 
@@ -188,7 +189,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
         style={chatOpen ? { "--chat-width": `${chatWidth}px` } : undefined}
       >
       <div className={styles.mainScroll}>
-      <div className={styles.container}>
+      <div ref={contentRef} className={styles.container}>
         <h1>第1章　社会の発展と半導体、半導体の品質管理</h1>
 
         <h2>1.1　半導体の過去、現在、未来</h2>
@@ -653,7 +654,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
             onPointerUp={handleResizePointerUp}
             onPointerCancel={handleResizePointerUp}
           />
-          <ChatPrompt />
+          <ChatPrompt contentRef={contentRef} />
         </aside>
       </div>
     </div>

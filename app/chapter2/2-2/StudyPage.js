@@ -85,6 +85,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
   const [resizing, setResizing] = useState(false);
   const resultRef = useRef(null);
+  const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const resizingRef = useRef(false);
 
@@ -188,7 +189,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
         style={chatOpen ? { "--chat-width": `${chatWidth}px` } : undefined}
       >
       <div className={styles.mainScroll}>
-      <div className={styles.container}>
+      <div ref={contentRef} className={styles.container}>
         <h1>2.2　電気回路と半導体</h1>
         <p>
           半導体素子を理解するためには、電気回路の基本を理解する必要があります。ダイオードやトランジスタなどの半導体素子も、抵抗や電源などと組み合わせて回路として使用されます。
@@ -456,7 +457,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
             onPointerUp={handleResizePointerUp}
             onPointerCancel={handleResizePointerUp}
           />
-          <ChatPrompt />
+          <ChatPrompt contentRef={contentRef} />
         </aside>
       </div>
     </div>

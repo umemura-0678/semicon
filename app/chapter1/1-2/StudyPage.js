@@ -85,6 +85,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
   const [resizing, setResizing] = useState(false);
   const resultRef = useRef(null);
+  const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const resizingRef = useRef(false);
 
@@ -188,7 +189,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
         style={chatOpen ? { "--chat-width": `${chatWidth}px` } : undefined}
       >
       <div className={styles.mainScroll}>
-      <div className={styles.container}>
+      <div ref={contentRef} className={styles.container}>
         <h1>1.2　半導体は何に使われている？</h1>
         <p>
           私たちの身の回りには、多くの半導体が使われています。例えば、スマートフォン、パソコン、テレビ、ゲーム機、自動車、エアコン、冷蔵庫、産業用ロボットなどです。
@@ -586,7 +587,7 @@ export default function StudyPage({ isAdminUser = false, children }) {
             onPointerUp={handleResizePointerUp}
             onPointerCancel={handleResizePointerUp}
           />
-          <ChatPrompt />
+          <ChatPrompt contentRef={contentRef} />
         </aside>
       </div>
     </div>
