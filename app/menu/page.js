@@ -46,10 +46,18 @@ export default async function MenuPage() {
               社会の発展と半導体、半導体の品質管理
             </h2>
             <ul className={styles.submenu}>
-              <li>1.1　半導体の過去、現在、未来</li>
-              <li>1.2　半導体は何に使われている？</li>
-              <li>1.3　半導体を安心して使うためには？</li>
-              <li>1.4　半導体とSDGｓの関係性</li>
+              <li>
+                <Link href="/chapter1/1-1">1.1　半導体の過去、現在、未来</Link>
+              </li>
+              <li>
+                <Link href="/chapter1/1-2">1.2　半導体は何に使われている？</Link>
+              </li>
+              <li>
+                <Link href="/chapter1/1-3">1.3　半導体を安心して使うためには？</Link>
+              </li>
+              <li>
+                <Link href="/chapter1/1-4">1.4　半導体とSDGｓの関係性</Link>
+              </li>
             </ul>
           </article>
           <article className={styles.card}>

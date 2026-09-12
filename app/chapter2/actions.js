@@ -7,6 +7,10 @@ import { isAdmin } from "@/utils/auth/admin";
 import { getYoutubeId } from "@/utils/youtube";
 
 const CHAPTER_PATHS = {
+  "1-1": "/chapter1/1-1",
+  "1-2": "/chapter1/1-2",
+  "1-3": "/chapter1/1-3",
+  "1-4": "/chapter1/1-4",
   "2-1": "/chapter2/2-1",
   "2-2": "/chapter2/2-2",
 };
