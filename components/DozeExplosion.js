@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { playWarningBeeps } from "@/utils/alertSound";
 import styles from "./DozeExplosion.module.css";
 
 const SHARDS = [
@@ -18,8 +19,10 @@ const SHARDS = [
 
 export default function DozeExplosion() {
   useEffect(() => {
+    const stopBeeps = playWarningBeeps();
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return undefined;
+      return stopBeeps;
     }
 
     const motion = document.documentElement.animate(
@@ -35,6 +38,7 @@ export default function DozeExplosion() {
     );
 
     return () => {
+      stopBeeps();
       motion.cancel();
       document.documentElement.style.transform = "";
     };

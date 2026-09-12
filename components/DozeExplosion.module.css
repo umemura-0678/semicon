@@ -22,7 +22,7 @@
   stroke-width: 0.45;
   fill: none;
   filter: drop-shadow(0 0 4px rgba(255, 80, 40, 0.65));
-  animation: cracks 1.1s ease-out forwards;
+  animation: cracks 4s ease-out forwards;
 }
 
 .shards {
@@ -42,7 +42,7 @@
     );
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   transform-origin: center;
-  animation: fly 1.15s cubic-bezier(0.18, 0.72, 0.28, 1) forwards;
+  animation: fly 4s cubic-bezier(0.18, 0.72, 0.28, 1) forwards;
   animation-delay: var(--delay);
 }
 
@@ -60,15 +60,17 @@
     opacity: 0;
     transform: scale(0.72);
   }
-  18% {
+  6% {
     opacity: 1;
     transform: scale(1);
   }
-  70% {
-    opacity: 0.85;
+  82% {
+    opacity: 0.8;
+    transform: scale(1);
   }
   100% {
     opacity: 0;
+    transform: scale(1);
   }
 }
 
@@ -76,6 +78,14 @@
   0% {
     transform: translate(0, 0) rotate(0deg);
     opacity: 1;
+  }
+  28% {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+    opacity: 0.75;
+  }
+  82% {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+    opacity: 0.45;
   }
   100% {
     transform: translate(var(--dx), var(--dy)) rotate(var(--rot));

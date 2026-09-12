@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { boredomLabel, combineBoredomScore, scoreBoredomFrame } from "@/utils/boredom";
+import { playShortBeeps, unlockAlertSound } from "@/utils/alertSound";
 import DozeExplosion from "./DozeExplosion";
 import styles from "./BoredomDetector.module.css";
 
@@ -22,6 +23,8 @@ export default function BoredomDetector() {
   const dragRef = useRef(null);
   const wasDozeRef = useRef(false);
   const restoreTimerRef = useRef(0);
+  const boredHighRef = useRef(false);
+  const lastBoredAlertRef = useRef(0);
   const [verdict, setVerdict] = useState(null);
   const [exploding, setExploding] = useState(false);
   const [score, setScore] = useState(0);
@@ -173,7 +176,7 @@ export default function BoredomDetector() {
       restoreTimerRef.current = window.setTimeout(() => {
         restoreTimerRef.current = 0;
         setExploding(false);
-      }, 3000);
+      }, 4000);
     }
     wasDozeRef.current = isDoze;
   }, [verdict?.key]);
@@ -184,6 +187,28 @@ export default function BoredomDetector() {
       restoreTimerRef.current = 0;
     };
   }, []);
+
+  useEffect(() => {
+    if (!cameraOn || exploding || verdict?.key === "doze" || verdict?.key === "noface") {
+      if (score < 0.5) {
+        boredHighRef.current = false;
+      }
+      return;
+    }
+
+    if (score >= 0.5) {
+      const now = Date.now();
+      const crossed = !boredHighRef.current;
+      boredHighRef.current = true;
+      if (crossed || now - lastBoredAlertRef.current > 8000) {
+        lastBoredAlertRef.current = now;
+        playShortBeeps();
+      }
+      return;
+    }
+
+    boredHighRef.current = false;
+  }, [cameraOn, exploding, score, verdict?.key]);
 
   function clampPosition(x, y, width, height) {
     const maxX = Math.max(0, window.innerWidth - width);
@@ -202,6 +227,8 @@ export default function BoredomDetector() {
     if (cameraOn) {
       setDocked(true);
       setDragging(false);
+    } else {
+      unlockAlertSound();
     }
     setCameraOn((on) => !on);
   }

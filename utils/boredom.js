@@ -344,9 +344,9 @@ export function detectDozing(frames) {
 
   return (
     nods >= 2 ||
-    closeMs >= 600 ||
+    closeMs >= 1000 ||
     perclos >= 0.35 ||
-    (closeMs >= 400 && headDropped)
+    (closeMs >= 700 && headDropped)
   );
 }
 
